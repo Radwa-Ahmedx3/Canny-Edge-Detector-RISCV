@@ -16,7 +16,7 @@ int main() {
     __riscv_vse32_v_i32m1(c, vc, vl);
 
     for(int i=0;i<4;i++){
-        printf("%d ", c[i]);
+        printf(	"Result: %d ", c[i]);
     }
 
     return 0;
