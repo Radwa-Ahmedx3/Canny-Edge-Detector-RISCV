@@ -1,14 +1,12 @@
-CXX = riscv64-unknown-elf-g++
-CXXFLAGS = -I./include -O2
-LDFLAGS = -static
+# RISC-V GTest
+GTEST_DIR = /home/radwa-ahmed/googletest/install
+TOOLCHAIN = /home/radwa-ahmed/riscv-toolchain/bin/riscv64-unknown-elf-
 
-# الملفات الأساسية
-SRC = src/image.cpp
-TEST_SRC = tests/critical_infra_test.cpp
-TARGET = infra_test
+CXX = $(TOOLCHAIN)g++
+CC  = $(TOOLCHAIN)gcc
 
-all:
-	$(CXX) $(CXXFLAGS) $(SRC) $(TEST_SRC) -o $(TARGET) $(LDFLAGS)
+# Flags
+CXXFLAGS = -march=rv64gcv -mabi=lp64d -static -I./include -I$(GTEST_DIR)/include
 
-clean:
-	rm -f $(TARGET)
+
+LDFLAGS = -L$(GTEST_DIR)/lib -lgtest -static
