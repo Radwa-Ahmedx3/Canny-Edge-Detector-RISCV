@@ -1,0 +1,6 @@
+build-host/
+build-rv/
+*.o
+*.raw
+canny_rv
+canny_host
