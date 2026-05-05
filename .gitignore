@@ -1,5 +1,7 @@
 # Build artifacts
 build/
+build-host/
+build-rv/
 *.o
 *.out
 
@@ -15,3 +17,7 @@ __pycache__/
 
 # GoogleTest (if not using submodule)
 googletest/
+
+# RISC-V binaries
+canny_rv
+canny_host
