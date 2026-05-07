@@ -1,57 +1,41 @@
-# =========================
-# Compilers
-# =========================
+# ==========================================
+# 1. Compilers & Toolchain
+# ==========================================
+TOOLCHAIN := /home/radwa-ahmed/riscv-toolchain/bin/riscv64-unknown-elf-
+CXX       := $(TOOLCHAIN)g++
 
-HOST_CXX = g++
-RV_CXX = riscv64-unknown-elf-g++
+# ==========================================
+# 2. Paths & Flags
+# ==========================================
+GTEST_DIR  := ./third_party/googletest/install
+GTEST_INC  := $(GTEST_DIR)/include
+GTEST_LIB  := $(GTEST_DIR)/lib/libgtest.a
+BUILD_RV   := build/rv
 
-# =========================
-# Flags
-# =========================
+RV_FLAGS   := -march=rv64gcv -mabi=lp64d -static -fno-exceptions -fno-rtti -I./include -I$(GTEST_INC)
+RV_DEFINES := -DGTEST_HAS_PTHREAD=0 -DGTEST_HAS_POSIX_RE=0
 
-HOST_FLAGS = -pthread
+# ==========================================
+# 3. Targets
+# ==========================================
 
-RV_FLAGS = -march=rv64gcv -mabi=lp64d -static
+.PHONY: all clean run_all
 
-# =========================
-# GoogleTest Paths
-# =========================
+all: hello_test rvv_test
 
-GTEST_INC = ./third_party/googletest/googletest/include
-GTEST_LIB = ./third_party/googletest/build/lib
+hello_test:
+	mkdir -p $(BUILD_RV)
+	$(CXX) $(RV_FLAGS) $(RV_DEFINES) tests/test_hello.cpp $(GTEST_LIB) -o $(BUILD_RV)/test_hello
 
-# =========================
-# Targets
-# =========================
+rvv_test:
+	mkdir -p $(BUILD_RV)
+	$(CXX) $(RV_FLAGS) $(RV_DEFINES) tests/rvv_test.cpp $(GTEST_LIB) -o $(BUILD_RV)/rvv_test
 
-all: host rvv
-
-# ---------- Host Test ----------
-
-host:
-	$(HOST_CXX) tests/host_test.cpp \
-	-I$(GTEST_INC) \
-	-L$(GTEST_LIB) \
-	-lgtest -lgtest_main \
-	$(HOST_FLAGS) \
-	-o host_test
-
-# ---------- RVV Test ----------
-
-rvv:
-	$(RV_CXX) $(RV_FLAGS) tests/my_rvv_test.cpp -o my_rvv_test
-
-# ---------- Run Host ----------
-
-run-host:
-	./host_test
-
-# ---------- Run RVV ----------
-
-run-rvv:
-	qemu-riscv64 ./my_rvv_test
-
-# ---------- Clean ----------
+run_all: hello_test rvv_test
+	@echo "--- Step 1 & 2: Running Infrastructure Tests ---"
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./$(BUILD_RV)/test_hello
+	@echo "--- Step 3 & 4: Running Vector (RVV) Logic Tests ---"
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./$(BUILD_RV)/rvv_test
 
 clean:
-	rm -f host_test my_rvv_test
+	rm -rf build/
