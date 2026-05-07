@@ -18,7 +18,7 @@ RV_FLAGS = -march=rv64gcv -mabi=lp64d -static
 # =========================
 
 GTEST_INC = ./third_party/googletest/googletest/include
-GTEST_LIB = ./third_party/googletest/build/lib
+GTEST_LIB = ./third_party/googletest/build_host/lib
 
 # =========================
 # Targets
