@@ -1,5 +1,4 @@
 
-vector
 # Build artifacts
 build/
 build-host/
@@ -23,3 +22,5 @@ googletest/
 # RISC-V binaries
 canny_rv
 canny_host
+host_test
+my_rvv_test
