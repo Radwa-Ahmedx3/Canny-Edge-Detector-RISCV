@@ -8,9 +8,6 @@ extern "C" {
     int mkdir(const char* pathname, unsigned int mode) { return -1; }
     int dup(int fd) { return -1; }
     int dup2(int oldfd, int newfd) { return -1; }
-    int regcomp(void* a, const char* b, int c) { return 0; }
-    int regexec(const void* a, const char* b, size_t c, void* d, int e) { return 0; }
-    void regfree(void* a) {}
 }
 
 TEST(RVV_Test, VectorAddition) {
