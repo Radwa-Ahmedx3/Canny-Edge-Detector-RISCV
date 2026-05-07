@@ -1,1 +1,25 @@
+
 vector
+# Build artifacts
+build/
+build-host/
+build-rv/
+*.o
+*.out
+
+# Binary files
+bin/
+
+# Raw Images
+*.raw
+
+# Python env
+__pycache__/
+.venv/
+
+# GoogleTest (if not using submodule)
+googletest/
+
+# RISC-V binaries
+canny_rv
+canny_host
