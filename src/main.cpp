@@ -1,6 +1,8 @@
 #include "image.hpp"
 #include "gaussian.hpp"
 #include "sobel.hpp"
+#include "nms.hpp"
+#include "hysteresis.hpp"
 #include <iostream>
 
 int main() {
@@ -15,13 +17,19 @@ int main() {
 
     // Gaussian Blur
     Image blurred = gaussianBlur(input);
-    blurred.save("blurred.raw");
     std::cout << "Gaussian Blur done!" << std::endl;
 
     // Sobel Gradient
     SobelResult result = sobelGradient(blurred);
-    result.magnitude.save("magnitude.raw");
     std::cout << "Sobel done!" << std::endl;
+
+    // Non-Maximum Suppression
+    Image thinned = nonMaxSuppression(result.magnitude, result.direction);
+    std::cout << "NMS done!" << std::endl;
+
+    // Hysteresis Thresholding
+    Image edges = hysteresisThreshold(thinned, 50, 150);
+    std::cout << "Hysteresis done!" << std::endl;
 
     return 0;
 }
