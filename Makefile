@@ -3,7 +3,7 @@
 # =========================
 
 HOST_CXX = g++
-RV_CXX = riscv64-unknown-elf-g++
+RV_CXX = riscv64-unknown-linux-gnu-g++
 
 # =========================
 # Flags
@@ -50,8 +50,42 @@ run-host:
 
 run-rvv:
 	qemu-riscv64 ./my_rvv_test
+# ---------- Canny Pipeline ----------
+canny_rv:
+	$(RV_CXX) $(RV_FLAGS) \
+	src/main.cpp \
+	src/image.cpp \
+	src/gaussian.cpp \
+	src/sobel.cpp \
+	src/nms.cpp \
+	src/hysteresis.cpp \
+	-I include \
+	-o canny_pipeline
 
+run:
+	qemu-riscv64 ./canny_pipeline
 # ---------- Clean ----------
 
 clean:
 	rm -f host_test my_rvv_test
+
+# ---------- Phase 4: Optimization Sweep ----------
+canny_O0:
+	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O0 \
+	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
+	-I include -o canny_O0
+
+canny_O2:
+	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O2 \
+	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
+	-I include -o canny_O2
+
+canny_O3:
+	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O3 \
+	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
+	-I include -o canny_O3
+
+canny_Os:
+	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -Os \
+	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
+	-I include -o canny_Os

@@ -4,35 +4,55 @@
 #include "nms.hpp"
 #include "hysteresis.hpp"
 #include <iostream>
+#include <time.h>
+
+double get_ms() {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec * 1000.0 + t.tv_nsec / 1e6;
+}
 
 int main() {
     int width = 128;
     int height = 128;
 
-    // عمل صورة تجريبية
     Image input(width, height);
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
             input.setPixel(x, y, (x + y) % 256);
 
+    double t1, t2;
+
     // Gaussian Blur
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) gaussianBlur(input);
     Image blurred = gaussianBlur(input);
-    std::cout << "Gaussian Blur done!" << std::endl;
+    t2 = get_ms();
+    std::cout << "Gaussian: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
-    // Sobel Gradient
+    // Sobel
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) sobelGradient(blurred);
     SobelResult result = sobelGradient(blurred);
-    std::cout << "Sobel done!" << std::endl;
+    t2 = get_ms();
+    std::cout << "Sobel: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
-    // Non-Maximum Suppression
+    // NMS
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) nonMaxSuppression(result.magnitude, result.direction);
     Image thinned = nonMaxSuppression(result.magnitude, result.direction);
-    std::cout << "NMS done!" << std::endl;
-    thinned.save("nms_output.raw");
-    std::cout << "NMS output saved!" << std::endl;
+    t2 = get_ms();
+    std::cout << "NMS: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
-    // Hysteresis Thresholding
+    // Hysteresis
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) hysteresisThreshold(thinned, 50, 150);
     Image edges = hysteresisThreshold(thinned, 50, 150);
-    std::cout << "Hysteresis done!" << std::endl;
-    edges.save("final_edges.raw");
-    std::cout << "Final edges saved!" << std::endl;
+    t2 = get_ms();
+    std::cout << "Hysteresis: " << (t2 - t1) / 100.0 << " ms" << std::endl;
+
+    thinned.save("./nms_output.raw");
+    edges.save("./final_edges.raw");
+
     return 0;
 }
