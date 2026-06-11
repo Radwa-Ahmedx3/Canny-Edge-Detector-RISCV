@@ -54,11 +54,11 @@ bool Image::load(const std::string& filename) {
 }
 
 bool Image::save(const std::string& filename) const {
-    FILE* file = fopen(filename.c_str(), "wb");
+    std::ofstream file(filename, std::ios::binary);
     if (!file) {
+        std::cerr << "Cannot save: " << filename << std::endl;
         return false;
     }
-    fwrite(data, 1, width * height, file);
-    fclose(file);
+    file.write((char*)data, width * height);
     return true;
 }

@@ -55,3 +55,14 @@ run-rvv:
 
 clean:
 	rm -f host_test my_rvv_test
+
+# ---------- Canny Pipeline (RISC-V) ----------
+canny_rv:
+	$(RV_CXX) $(RV_FLAGS) \
+	src/image.cpp src/gaussian.cpp src/sobel.cpp src/main.cpp \
+	-Iinclude \
+	-o canny_rv
+
+# ---------- Run Canny on QEMU ----------
+run-canny:
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./canny_rv
