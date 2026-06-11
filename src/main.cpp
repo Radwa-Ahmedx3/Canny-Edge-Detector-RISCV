@@ -26,10 +26,13 @@ int main() {
     // Non-Maximum Suppression
     Image thinned = nonMaxSuppression(result.magnitude, result.direction);
     std::cout << "NMS done!" << std::endl;
+    thinned.save("nms_output.raw");
+    std::cout << "NMS output saved!" << std::endl;
 
     // Hysteresis Thresholding
     Image edges = hysteresisThreshold(thinned, 50, 150);
     std::cout << "Hysteresis done!" << std::endl;
-
+    edges.save("final_edges.raw");
+    std::cout << "Final edges saved!" << std::endl;
     return 0;
 }
