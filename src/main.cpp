@@ -4,12 +4,12 @@
 #include "nms.hpp"
 #include "hysteresis.hpp"
 #include <iostream>
-#include <time.h>
+#include <sys/time.h>
 
 double get_ms() {
-    struct timespec t;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    return t.tv_sec * 1000.0 + t.tv_nsec / 1e6;
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec * 1000.0 + t.tv_usec / 1000.0;
 }
 
 int main() {
