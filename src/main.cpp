@@ -12,14 +12,14 @@ double get_ms() {
     return t.tv_sec * 1000.0 + t.tv_usec / 1000.0;
 }
 
-int main() {
-    int width = 128;
-    int height = 128;
+void process_image(const char* input_file, const char* output_nms, const char* output_edges, int width, int height) {
+    std::cout << "\n=== Processing: " << input_file << " ===" << std::endl;
 
     Image input(width, height);
-    for (int y = 0; y < height; y++)
-        for (int x = 0; x < width; x++)
-            input.setPixel(x, y, (x + y) % 256);
+    if (!input.load(input_file)) {
+        std::cout << "Failed to load image!" << std::endl;
+        return;
+    }
 
     double t1, t2;
 
@@ -46,13 +46,18 @@ int main() {
 
     // Hysteresis
     t1 = get_ms();
-    for (int i = 0; i < 100; i++) hysteresisThreshold(thinned, 50, 150);
-    Image edges = hysteresisThreshold(thinned, 50, 150);
+    for (int i = 0; i < 100; i++) hysteresisThreshold(thinned, 20, 80);
+    Image edges = hysteresisThreshold(thinned, 20, 80);
     t2 = get_ms();
     std::cout << "Hysteresis: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
-    thinned.save("./nms_output.raw");
-    edges.save("./final_edges.raw");
+    thinned.save(output_nms);
+    edges.save(output_edges);
+}
 
+int main() {
+    process_image("test_square.raw", "square_nms.raw", "square_edges.raw", 128, 128);
+    process_image("test_shapes.raw", "shapes_nms.raw", "shapes_edges.raw", 128, 128);
+    process_image("test_real.raw", "real_nms.raw", "real_edges.raw", 128, 128);
     return 0;
 }
