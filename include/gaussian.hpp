@@ -6,3 +6,4 @@
 Image gaussianBlur(const Image& input);
 
 #endif
+Image gaussianBlurPadded(const Image& input);
