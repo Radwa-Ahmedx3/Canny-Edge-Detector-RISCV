@@ -67,7 +67,7 @@ run:
 # ---------- Clean ----------
 
 clean:
-	rm -f host_test my_rvv_test
+	rm -f host_test my_rvv_test canny_pipeline canny_O0 canny_O2 canny_O3 canny_Os canny_Ofast
 
 # ---------- Phase 4: Optimization Sweep ----------
 canny_O0:
@@ -89,3 +89,8 @@ canny_Os:
 	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -Os \
 	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
 	-I include -o canny_Os
+
+canny_Ofast:
+	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -Ofast \
+	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
+	-I include -o canny_Ofast
