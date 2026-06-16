@@ -1,91 +1,79 @@
 # =========================
 # Compilers
 # =========================
-
 HOST_CXX = g++
-RV_CXX = riscv64-unknown-linux-gnu-g++
+RV_CXX   = riscv64-unknown-elf-g++
 
 # =========================
 # Flags
 # =========================
-
-HOST_FLAGS = -pthread
-
-RV_FLAGS = -march=rv64gcv -mabi=lp64d -static
+HOST_FLAGS = -I include
+RV_FLAGS   = -march=rv64gcv -mabi=lp64d -static -I include
 
 # =========================
-# GoogleTest Paths
+# Source Files
 # =========================
-
-GTEST_INC = ./third_party/googletest/googletest/include
-GTEST_LIB = ./third_party/googletest/build_host/lib
+SRCS = src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp
+RVV_SRCS = src/gaussian_rvv.cpp src/sobel_rvv.cpp
 
 # =========================
-# Targets
+# GoogleTest
 # =========================
+GTEST_INC = $(HOME)/gtest-install/include
+GTEST_LIB = $(HOME)/gtest-install/lib
 
-all: host rvv
+# =========================
+# Default Target
+# =========================
+all: host canny_rv
 
-# ---------- Host Test ----------
-
+# ---------- Host Pipeline ----------
 host:
-	$(HOST_CXX) tests/host_test.cpp \
-	-I$(GTEST_INC) \
-	-L$(GTEST_LIB) \
-	-lgtest -lgtest_main \
-	$(HOST_FLAGS) \
-	-o host_test
+	$(HOST_CXX) $(HOST_FLAGS) src/main.cpp $(SRCS) -o build-host/canny_host
 
-# ---------- RVV Test ----------
+# ---------- Host GoogleTest ----------
+test:
+	$(HOST_CXX) $(HOST_FLAGS) -I$(GTEST_INC) \
+		tests/pipeline_test.cpp $(SRCS) \
+		-L$(GTEST_LIB) -lgtest -lgtest_main -lpthread \
+		-o build-host/pipeline_tests
+	./build-host/pipeline_tests
 
-rvv:
-	$(RV_CXX) $(RV_FLAGS) tests/my_rvv_test.cpp -o my_rvv_test
-
-# ---------- Run Host ----------
-
-run-host:
-	./host_test
-
-# ---------- Run RVV ----------
-
-run-rvv:
-	qemu-riscv64 ./my_rvv_test
-# ---------- Canny Pipeline ----------
+# ---------- RISC-V Pipeline ----------
 canny_rv:
-	$(RV_CXX) $(RV_FLAGS) \
-	src/main.cpp \
-	src/image.cpp \
-	src/gaussian.cpp \
-	src/sobel.cpp \
-	src/nms.cpp \
-	src/hysteresis.cpp \
-	-I include \
-	-o canny_pipeline
+	$(RV_CXX) $(RV_FLAGS) src/main_qemu.cpp $(SRCS) -o build-rv/canny_rv
 
+# ---------- Run on QEMU ----------
 run:
-	qemu-riscv64 ./canny_pipeline
-# ---------- Clean ----------
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/canny_rv
 
-clean:
-	rm -f host_test my_rvv_test
-
-# ---------- Phase 4: Optimization Sweep ----------
+# ---------- Compiler Optimization Sweep ----------
 canny_O0:
-	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O0 \
-	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
-	-I include -o canny_O0
+	$(RV_CXX) $(RV_FLAGS) -O0 src/main_qemu.cpp $(SRCS) -o build-rv/canny_O0
 
 canny_O2:
-	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O2 \
-	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
-	-I include -o canny_O2
+	$(RV_CXX) $(RV_FLAGS) -O2 src/main_qemu.cpp $(SRCS) -o build-rv/canny_O2
 
 canny_O3:
-	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -O3 \
-	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
-	-I include -o canny_O3
+	$(RV_CXX) $(RV_FLAGS) -O3 src/main_qemu.cpp $(SRCS) -o build-rv/canny_O3
 
 canny_Os:
-	$(RV_CXX) -march=rv64gcv -mabi=lp64d -static -Os \
-	src/main.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp \
-	-I include -o canny_Os
+	$(RV_CXX) $(RV_FLAGS) -Os src/main_qemu.cpp $(SRCS) -o build-rv/canny_Os
+
+canny_Ofast:
+	$(RV_CXX) $(RV_FLAGS) -Ofast src/main_qemu.cpp $(SRCS) -o build-rv/canny_Ofast
+
+sweep: canny_O0 canny_O2 canny_O3 canny_Os canny_Ofast
+
+# ---------- RVV Intrinsics ----------
+rvv_timing:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/main_rvv_timing.cpp $(SRCS) $(RVV_SRCS) \
+		-o build-rv/timing_rvv
+
+rvv_test:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/test_rvv_equivalence.cpp $(SRCS) $(RVV_SRCS) \
+		-o build-rv/test_rvv
+
+# ---------- Clean ----------
+clean:
+	rm -f build-host/* build-rv/* *.raw *.png

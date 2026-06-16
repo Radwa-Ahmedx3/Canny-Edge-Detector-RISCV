@@ -4,5 +4,6 @@
 #include "image.hpp"
 
 Image gaussianBlur(const Image& input);
+Image gaussianBlurPadded(const Image& input);
 
 #endif

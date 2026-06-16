@@ -15,7 +15,7 @@ double get_ms() {
 int main() {
     int width = 128, height = 128;
 
-    // Generate synthetic square image in memory
+    // Generate synthetic square image in memory (no file I/O needed)
     Image input(width, height);
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++) {
@@ -23,31 +23,44 @@ int main() {
             input.setPixel(x, y, inSquare ? 255 : 0);
         }
 
-    double t1, t2;
+    const int RUNS = 100;
+    double g_total = 0, s_total = 0, n_total = 0, h_total = 0;
 
-    t1 = get_ms();
-    for (int i = 0; i < 100; i++) gaussianBlur(input);
-    Image blurred = gaussianBlur(input);
-    t2 = get_ms();
-    std::cout << "Gaussian: " << (t2-t1)/100.0 << " ms" << std::endl;
+    for (int i = 0; i < RUNS; i++) {
+        double t0 = get_ms();
+        Image blurred = gaussianBlur(input);
+        double t1 = get_ms();
+        SobelResult result = sobelGradient(blurred);
+        double t2 = get_ms();
+        Image thinned = nonMaxSuppression(result.magnitude, result.direction);
+        double t3 = get_ms();
+        Image edges = hysteresisThreshold(thinned, 20, 80);
+        double t4 = get_ms();
 
-    t1 = get_ms();
-    for (int i = 0; i < 100; i++) sobelGradient(blurred);
-    SobelResult result = sobelGradient(blurred);
-    t2 = get_ms();
-    std::cout << "Sobel: " << (t2-t1)/100.0 << " ms" << std::endl;
+        g_total += t1 - t0;
+        s_total += t2 - t1;
+        n_total += t3 - t2;
+        h_total += t4 - t3;
+    }
 
-    t1 = get_ms();
-    for (int i = 0; i < 100; i++) nonMaxSuppression(result.magnitude, result.direction);
-    Image thinned = nonMaxSuppression(result.magnitude, result.direction);
-    t2 = get_ms();
-    std::cout << "NMS: " << (t2-t1)/100.0 << " ms" << std::endl;
+    double avg_g = g_total / RUNS;
+    double avg_s = s_total / RUNS;
+    double avg_n = n_total / RUNS;
+    double avg_h = h_total / RUNS;
+    double avg_total = avg_g + avg_s + avg_n + avg_h;
 
-    t1 = get_ms();
-    for (int i = 0; i < 100; i++) hysteresisThreshold(thinned, 20, 80);
-    Image edges = hysteresisThreshold(thinned, 20, 80);
-    t2 = get_ms();
-    std::cout << "Hysteresis: " << (t2-t1)/100.0 << " ms" << std::endl;
+    std::cout << "Averaged over " << RUNS << " runs:\n";
+    std::cout << "-------------------------\n";
+    std::cout << "Gaussian:   " << avg_g << " ms  ("
+              << (avg_g / avg_total * 100) << "%)\n";
+    std::cout << "Sobel:      " << avg_s << " ms  ("
+              << (avg_s / avg_total * 100) << "%)\n";
+    std::cout << "NMS:        " << avg_n << " ms  ("
+              << (avg_n / avg_total * 100) << "%)\n";
+    std::cout << "Hysteresis: " << avg_h << " ms  ("
+              << (avg_h / avg_total * 100) << "%)\n";
+    std::cout << "-------------------------\n";
+    std::cout << "Total:      " << avg_total << " ms\n";
 
     return 0;
 }
