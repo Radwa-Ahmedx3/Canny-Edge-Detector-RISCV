@@ -1,27 +1,63 @@
 #include "image.hpp"
 #include "gaussian.hpp"
 #include "sobel.hpp"
+#include "nms.hpp"
+#include "hysteresis.hpp"
 #include <iostream>
+#include <sys/time.h>
 
-int main() {
-    int width = 128;
-    int height = 128;
+double get_ms() {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec * 1000.0 + t.tv_usec / 1000.0;
+}
 
-    // عمل صورة تجريبية
+void process_image(const char* input_file, const char* output_nms, const char* output_edges, int width, int height) {
+    std::cout << "\n=== Processing: " << input_file << " ===" << std::endl;
+
     Image input(width, height);
-    for (int y = 0; y < height; y++)
-        for (int x = 0; x < width; x++)
-            input.setPixel(x, y, (x + y) % 256);
+    if (!input.load(input_file)) {
+        std::cout << "Failed to load image!" << std::endl;
+        return;
+    }
+
+    double t1, t2;
 
     // Gaussian Blur
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) gaussianBlur(input);
     Image blurred = gaussianBlur(input);
-    blurred.save("blurred.raw");
-    std::cout << "Gaussian Blur done!" << std::endl;
+    t2 = get_ms();
+    std::cout << "Gaussian: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
-    // Sobel Gradient
+    // Sobel
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) sobelGradient(blurred);
     SobelResult result = sobelGradient(blurred);
-    result.magnitude.save("magnitude.raw");
-    std::cout << "Sobel done!" << std::endl;
+    t2 = get_ms();
+    std::cout << "Sobel: " << (t2 - t1) / 100.0 << " ms" << std::endl;
 
+    // NMS
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) nonMaxSuppression(result.magnitude, result.direction);
+    Image thinned = nonMaxSuppression(result.magnitude, result.direction);
+    t2 = get_ms();
+    std::cout << "NMS: " << (t2 - t1) / 100.0 << " ms" << std::endl;
+
+    // Hysteresis
+    t1 = get_ms();
+    for (int i = 0; i < 100; i++) hysteresisThreshold(thinned, 20, 80);
+    Image edges = hysteresisThreshold(thinned, 20, 80);
+    t2 = get_ms();
+    std::cout << "Hysteresis: " << (t2 - t1) / 100.0 << " ms" << std::endl;
+
+    thinned.save(output_nms);
+    edges.save(output_edges);
+}
+
+int main() {
+    process_image("test_square.raw", "square_nms.raw", "square_edges.raw", 128, 128);
+    process_image("test_shapes.raw", "shapes_nms.raw", "shapes_edges.raw", 128, 128);
+    process_image("test_real.raw", "real_nms.raw", "real_edges.raw", 128, 128);
     return 0;
 }
