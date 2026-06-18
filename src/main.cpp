@@ -56,8 +56,8 @@ void process_image(const char* input_file, const char* output_nms, const char* o
 }
 
 int main() {
-    process_image("test_square.raw", "square_nms.raw", "square_edges.raw", 128, 128);
-    process_image("test_shapes.raw", "shapes_nms.raw", "shapes_edges.raw", 128, 128);
-    process_image("test_real.raw", "real_nms.raw", "real_edges.raw", 128, 128);
+    process_image("test_square.raw", "/tmp/square_nms.raw", "/tmp/square_edges.raw", 128, 128);
+    process_image("test_shapes.raw", "/tmp/shapes_nms.raw", "/tmp/shapes_edges.raw", 128, 128);
+    process_image("test_real.raw", "/tmp/real_nms.raw", "/tmp/real_edges.raw", 128, 128);
     return 0;
 }
