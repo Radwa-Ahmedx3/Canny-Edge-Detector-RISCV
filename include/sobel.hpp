@@ -12,4 +12,5 @@ struct SobelResult {
 
 SobelResult sobelGradient(const Image& input);
 
+SobelResult sobelGradientRVV(const Image& input);
 #endif
