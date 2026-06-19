@@ -4,4 +4,5 @@
 # qemu-riscv64 --version : ///////
 # git branch -a : show all the branches we have 
 # git checkout feature/dana-image-gaussian-sobel ينقلني على برانش دانا علشان نشوف اكوادها
+# ls src : to see the files in the src like : gaussian.cpp and any file .cpp this is the source file 
 # 
