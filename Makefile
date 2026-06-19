@@ -41,7 +41,7 @@ test:
 
 # ---------- RISC-V Pipeline ----------
 canny_rv:
-	$(RV_CXX) $(RV_FLAGS) src/main_qemu.cpp $(SRCS) -o build-rv/canny_rv
+$(RV_CXX) $(RV_FLAGS) src/main.cpp $(SRCS) $(RVV_SRCS) -o build-rv/canny_rv
 
 # ---------- Run on QEMU ----------
 run:
