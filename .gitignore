@@ -1,27 +1,23 @@
+# Compiled binaries
+canny_*
+host_test
+my_rvv_test
+test_rvv
+timing_rvv
 
 # Build artifacts
-build/
 build-host/
 build-rv/
 *.o
-*.out
+*.a
 
-# Binary files
-bin/
-
-# Raw Images
+# Generated images and data
 *.raw
+*.png
+*.jpg:Zone.Identifier
 
-# Python env
-__pycache__/
-.venv/
+# IDE and OS
+.vscode/
+.DS_Store
+*~
 
-# GoogleTest (if not using submodule)
-googletest/
-
-# RISC-V binaries
-canny_rv
-canny_host
-host_test
-my_rvv_test
-canny_pipeline
