@@ -1,0 +1,20 @@
+HOST_CXX = g++
+RV_CXX = riscv64-unknown-elf-g++
+RV_FLAGS = -march=rv64gcv -mabi=lp64d -static
+
+all: host rvv
+
+host:
+	$(HOST_CXX) host_test_simple.cpp -lgtest -lgtest_main -pthread -o host_test
+
+rvv:
+	$(RV_CXX) $(RV_FLAGS) vector_test.cpp -o my_rvv_test
+
+run-host: host
+	./host_test
+
+run-rvv: rvv
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./my_rvv_test
+
+clean:
+	rm -f host_test my_rvv_test
