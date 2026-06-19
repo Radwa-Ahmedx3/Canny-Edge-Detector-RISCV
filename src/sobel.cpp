@@ -1,7 +1,6 @@
 #include "sobel.hpp"
 #include <cstdlib>
 #include <cmath>
-
 // Sobel X kernel
 static const int Kx[3][3] = {
     {-1, 0, 1},
@@ -14,7 +13,6 @@ static const int Ky[3][3] = {
     { 0,  0,  0},
     { 1,  2,  1}
 };
-
 SobelResult sobelGradient(const Image& input) {
     int w = input.getWidth();
     int h = input.getHeight();
@@ -56,7 +54,6 @@ SobelResult sobelGradient(const Image& input) {
     SobelResult result = {magnitude, direction};
     return result;
 }
-
 // L2 norm: sqrt(Gx^2 + Gy^2) -- mathematically correct but requires floating point
 SobelResult sobelGradientL2(const Image& input) {
     int w = input.getWidth(), h = input.getHeight();
