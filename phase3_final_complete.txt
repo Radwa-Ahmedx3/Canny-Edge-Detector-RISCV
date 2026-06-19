@@ -1,0 +1,114 @@
+
+╔══════════════════════════════════════════════════════════════╗
+║           PHASE 3: COMPREHENSIVE MASTER TEST                 ║
+║     All 8 Tests - Clean Organized Output                     ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 1: Gaussian Uniform Image (128×128)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: All pixels = 128 (uniform gray)
+Expected: Center pixel ≈ 128 (±2)
+
+Result: Center pixel = 128
+Status: ✓ PASS
+Image generated: TEST1_GAUSSIAN_UNIFORM.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 2: Gaussian Black Image (128×128)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: All pixels = 0 (pure black)
+Expected: Center pixel = 0
+
+Result: Center pixel = 0
+Status: ✓ PASS
+Image generated: TEST2_GAUSSIAN_BLACK.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 3: Gaussian Impulse Image (128×128)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: Single bright pixel (255) at center (64,64)
+Expected: Symmetric spread - Left=Right, Top=Bottom
+
+Spread: Left=24, Right=24, Top=24, Bottom=24
+Status: ✓ PASS (symmetric)
+Image generated: TEST3_GAUSSIAN_IMPULSE.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 4: Sobel Vertical Edge (96×96)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: Left half = black (0), Right half = white (255)
+Expected: Magnitude > 50 at edge, Direction = 0° (horizontal)
+
+Magnitude at edge: 148 (expected >50)
+Direction detected: 0° (expected: 0°)
+Status: ✓ PASS
+Image generated: TEST4_SOBEL_VERTICAL_MAG.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 5: Sobel Horizontal Edge (96×96)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: Top half = black (0), Bottom half = white (255)
+Expected: Magnitude > 50 at edge, Direction = 90° (vertical)
+
+Magnitude at edge: 148 (expected >50)
+Direction detected: 90° (expected: 90°)
+Status: ✓ PASS
+Image generated: TEST5_SOBEL_HORIZONTAL_MAG.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 6: Sobel Diagonal Edge (96×96)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: Diagonal split (lower-right = white, upper-left = black)
+Expected: Magnitude > 50 at edge, Direction = 45° or 135°
+
+Magnitude at edge: 211 (expected >50)
+Direction detected: 135° (expected: 45° or 135°)
+Status: ✓ PASS
+Image generated: TEST6_SOBEL_DIAGONAL_MAG.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 7: Full Canny Pipeline (64×64)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: Vertical edge (left=black, right=white)
+Steps: Gaussian → Sobel → NMS → Hysteresis
+Expected: Clean vertical edge detected
+
+Status: ✓ PASS
+Image generated: TEST7_CANNY_OUTPUT.ppm
+
+╔══════════════════════════════════════════════════════════════╗
+║  TEST 8: Equivalence Testing (100×75)
+╚══════════════════════════════════════════════════════════════╝
+
+Input: 100×75 uniform image (non-power-of-two)
+Testing: Scalar vs RVV Gaussian Blur
+Tolerance: ±1 pixel per value
+
+Max difference: 1
+Pixels exceeding ±1: 0
+Status: ✓ PASS (Scalar ≡ RVV)
+
+╔══════════════════════════════════════════════════════════════╗
+║                     PHASE 3 SUMMARY                         ║
+║  ✓ TEST 1: Gaussian Uniform                                 ║
+║  ✓ TEST 2: Gaussian Black                                   ║
+║  ✓ TEST 3: Gaussian Impulse                                 ║
+║  ✓ TEST 4: Sobel Vertical (direction 0°)                    ║
+║  ✓ TEST 5: Sobel Horizontal (direction 90°)                 ║
+║  ✓ TEST 6: Sobel Diagonal (direction 45°/135°)              ║
+║  ✓ TEST 7: Full Canny Pipeline                              ║
+║  ✓ TEST 8: Equivalence Testing (±1 tolerance)               ║
+║                                                              ║
+║  All 8 tests PASSED on RISC-V ELF                           ║
+║  7 images generated | Directions verified                   ║
+╚══════════════════════════════════════════════════════════════╝
+

@@ -13,7 +13,7 @@ RV_FLAGS   = -march=rv64gcv -mabi=lp64d -static -I include
 # =========================
 # Source Files
 # =========================
-SRCS = src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp
+SRCS = syscalls.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp
 RVV_SRCS = src/gaussian_rvv.cpp src/sobel_rvv.cpp
 
 # =========================
@@ -38,6 +38,11 @@ test:
 		-L$(GTEST_LIB) -lgtest -lgtest_main -lpthread \
 		-o build-host/pipeline_tests
 	./build-host/pipeline_tests
+
+# ---------- RISC-V Equivalence Tests ----------
+	test_rvv_equiv:
+	$(RV_CXX) $(RV_FLAGS) src/test_equivalence.cpp $(SRCS) $(RVV_SRCS) -o build-rv/test_equiv
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/test_equiv
 
 # ---------- RISC-V Pipeline ----------
 canny_rv:
@@ -77,3 +82,13 @@ rvv_test:
 # ---------- Clean ----------
 clean:
 	rm -f build-host/* build-rv/* *.raw *.png
+
+# ---------- RISC-V Equivalence Tests ----------
+test_rvv_equiv:
+	$(RV_CXX) $(RV_FLAGS) src/test_equivalence.cpp $(SRCS) $(RVV_SRCS) -o build-rv/test_equiv
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/test_equiv
+
+# Test with RISC-V syscalls
+test_risc_v:
+	$(RV_CXX) $(RV_FLAGS) src/main_risc_v_test.cpp $(SRCS) $(RVV_SRCS) -o build-rv/test_risc_v
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/test_risc_v
