@@ -25,3 +25,30 @@ canny_host
 host_test
 my_rvv_test
 canny_pipeline
+# Generated Canny build artifacts (Makefile targets)
+canny_O0
+canny_O2
+canny_O3
+canny_Os
+canny_Ofast
+canny_O0_rvv
+canny_O2_rvv
+canny_O3_rvv
+canny_Os_rvv
+canny_Ofast_rvv
+canny_O3_vecinfo
+canny_fp_test
+phase3_test
+
+# Generated reports / previews
+vec_report.txt
+vec_report2.txt
+preview_*.png
+
+# Generated pipeline output images
+full_pipeline.png
+pipeline_display.png
+canny_lmul1
+canny_lmul2
+canny_lmul4
+equivalence_test
