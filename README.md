@@ -64,3 +64,94 @@ Run `qemu-riscv64 ./<binary_name>` directly for any binary built above (e.g. `qe
 - **"No such file or directory" on `qemu-riscv64 --version`** — check for a stray en-dash; retype the command instead of pasting it.
 - **Linker error `undefined reference to gaussianBlurRVV`** — you're linking `main.cpp` (RVV entry point) with scalar source files. Use `main_scalar.cpp` for scalar builds, `main.cpp` for RVV builds (see `make canny_rv` vs `make canny_O0_rvv` in the Makefile).
 - **After `git clean`, all `qemu-riscv64 ./canny_*` commands fail** — `git clean` removes untracked build artifacts. Run `make sweep sweep_rvv canny_fp_test` (or `make binary-sizes`) to rebuild everything.
+
+## Commands
+This section lists the exact commands used to set up, build, test, and
+benchmark the pipeline across Phases 0-7. Run them in order from the repo
+root.
+
+### Phase 0 — Setup
+```bash
+make setup
+ls -la test_input.raw
+```
+
+### Phase 1 — Toolchain Verification
+```bash
+riscv64-unknown-elf-g++ --version
+qemu-riscv64 --version
+
+# Confirm the V extension is enabled in this toolchain
+riscv64-unknown-elf-g++ -march=rv64gcv -mabi=lp64d -dM -E - < /dev/null | grep __riscv_v
+
+# Compile and run a minimal RVV intrinsic sanity test
+make rvv && qemu-riscv64 ./my_rvv_test
+```
+
+### Phase 2 — Scalar Pipeline Source
+```bash
+cat src/gaussian.cpp | head -5
+cat src/sobel.cpp | head -5
+cat src/nms.cpp | head -5
+cat src/hysteresis.cpp | head -5
+```
+
+### Phase 3 — Testing
+```bash
+g++ -I include tests/phase3_test.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp -o phase3_test && ./phase3_test
+```
+
+### Phase 4 — Scalar Compiler Optimization Sweep
+```bash
+make sweep
+qemu-riscv64 ./canny_O0
+qemu-riscv64 ./canny_O2
+qemu-riscv64 ./canny_O3
+qemu-riscv64 ./canny_Os
+qemu-riscv64 ./canny_Ofast
+```
+
+### Phase 5 — Profiling Baseline
+```bash
+ls -lh canny_scalar_final canny_O0 canny_O2 canny_O3
+qemu-riscv64 ./canny_scalar_final
+```
+
+### Phase 6 — RVV Intrinsic Optimization
+```bash
+cat src/gaussian_rvv.cpp | head -5
+cat src/sobel_rvv.cpp | head -5
+
+riscv64-unknown-elf-objdump -d my_rvv_test | grep -E "vle32|vadd|vse32" | head -10
+
+make canny_O0_rvv && qemu-riscv64 ./canny_O0_rvv
+```
+
+**LMUL sweep (6.2):**
+```bash
+make lmul-sweep
+```
+
+**Scalar vs RVV equivalence, non-power-of-two image, all VLEN (6.6):**
+```bash
+make test-equivalence
+```
+
+**VLEN sweep, timing (6.6):**
+```bash
+make canny_Os_rvv && qemu-riscv64 -cpu rv64,v=true,vlen=128 ./canny_Os_rvv
+qemu-riscv64 -cpu rv64,v=true,vlen=256 ./canny_Os_rvv
+qemu-riscv64 -cpu rv64,v=true,vlen=512 ./canny_Os_rvv
+```
+
+### Phase 7 — Auto-Vectorization Proof and Binary Sizes
+```bash
+make canny_O3_vecinfo
+grep "vectorized 0 loops" vec_report.txt
+make binary-sizes
+```
+
+### Verifying a Clean State
+```bash
+git status
+```
