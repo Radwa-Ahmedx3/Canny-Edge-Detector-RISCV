@@ -193,3 +193,34 @@ phase6-3-all: phase6-3-vlen-128 phase6-3-vlen-256 phase6-3-vlen-512
 
 .PHONY: phase6-3
 phase6-3: phase6-3-all
+
+.PHONY: phase6-4-build
+phase6-4-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_4_gaussian_full.cpp src/image.cpp src/gaussian.cpp src/gaussian_rvv.cpp -o phase6_4_gaussian
+
+.PHONY: phase6-4-run
+phase6-4-run: phase6-4-build
+	@echo "=== PHASE 6.4: GAUSSIAN CONVOLUTION ===" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_4_gaussian
+
+.PHONY: phase6-5-build
+phase6-5-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_5_sobel_full.cpp src/image.cpp src/sobel.cpp src/sobel_rvv.cpp -o phase6_5_sobel
+
+.PHONY: phase6-5-run
+phase6-5-run: phase6-5-build
+	@echo "=== PHASE 6.5: SOBEL MAGNITUDE ===" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_5_sobel
+
+.PHONY: phase6-6-build
+phase6-6-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_6_vlen_sweep.cpp src/image.cpp src/gaussian_rvv.cpp src/sobel_rvv.cpp -o phase6_6_vlen
+
+.PHONY: phase6-6-run
+phase6-6-run: phase6-6-build
+	@echo "VLEN=128:" && qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_6_vlen && \
+	echo "VLEN=256:" && qemu-riscv64 -cpu rv64,v=true,vlen=256 ./phase6_6_vlen && \
+	echo "VLEN=512:" && qemu-riscv64 -cpu rv64,v=true,vlen=512 ./phase6_6_vlen
+
+.PHONY: phase6-4-5-6
+phase6-4-5-6: phase6-4-run phase6-5-run phase6-6-run
