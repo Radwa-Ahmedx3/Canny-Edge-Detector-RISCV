@@ -166,3 +166,30 @@ phase6-2-all: phase6-2-vlen-128 phase6-2-vlen-256 phase6-2-vlen-512
 
 .PHONY: phase6-2
 phase6-2: phase6-2-all
+
+.PHONY: phase6-3-build
+phase6-3-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_sobel_rvv.cpp src/image.cpp src/sobel.cpp src/sobel_rvv.cpp -o phase6_sobel_rvv
+
+.PHONY: phase6-3-run
+phase6-3-run: phase6-3-build
+	@echo "=== PHASE 6.3: SOBEL MAGNITUDE (L1 NORM) ===" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_sobel_rvv
+
+.PHONY: phase6-3-vlen-128
+phase6-3-vlen-128: phase6-3-build
+	@echo "VLEN=128:" && qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_sobel_rvv
+
+.PHONY: phase6-3-vlen-256
+phase6-3-vlen-256: phase6-3-build
+	@echo "VLEN=256:" && qemu-riscv64 -cpu rv64,v=true,vlen=256 ./phase6_sobel_rvv
+
+.PHONY: phase6-3-vlen-512
+phase6-3-vlen-512: phase6-3-build
+	@echo "VLEN=512:" && qemu-riscv64 -cpu rv64,v=true,vlen=512 ./phase6_sobel_rvv
+
+.PHONY: phase6-3-all
+phase6-3-all: phase6-3-vlen-128 phase6-3-vlen-256 phase6-3-vlen-512
+
+.PHONY: phase6-3
+phase6-3: phase6-3-all
