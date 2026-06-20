@@ -78,4 +78,39 @@ make phase3-all
 
 # Convert generated .ppm output images to .png for viewing
 convert input.ppm output.png
+
+# Build Phase 3.1: Complete tests
+riscv64-unknown-elf-g++ -march=rv64gcv -mabi=lp64d -static -I include src/phase3_complete_tests.cpp src/image.cpp src/gaussian.cpp src/gaussian_rvv.cpp src/sobel.cpp src/sobel_rvv.cpp src/nms.cpp src/hysteresis.cpp -o build-rv/phase3_complete
+
+# Test Phase 3.1
+echo "=== PHASE 3.1: Complete Tests ==="
+qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/phase3_complete 2>&1 | grep -E "TEST|Status|PASS|FAIL"
+
+echo ""
+
+# Build Phase 3.2: Equivalence tolerance
+riscv64-unknown-elf-g++ -march=rv64gcv -mabi=lp64d -static -I include src/test_equivalence_tolerance.cpp src/image.cpp src/gaussian.cpp src/gaussian_rvv.cpp src/sobel.cpp src/sobel_rvv.cpp -o build-rv/test_equiv_tolerance
+
+# Test Phase 3.2
+echo "=== PHASE 3.2: Equivalence Tolerance ==="
+qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/test_equiv_tolerance 2>&1
+*******
+# Build Phase 3.2
+riscv64-unknown-elf-g++ -march=rv64gcv -mabi=lp64d -static \
+  -I include src/test_equivalence_tolerance.cpp \
+  src/image.cpp src/gaussian.cpp src/gaussian_rvv.cpp \
+  src/sobel.cpp src/sobel_rvv.cpp \
+  -o build-rv/test_equiv_tolerance
+
+# Test at VLEN=128
+echo "=== VLEN=128 ==="
+qemu-riscv64 -cpu rv64,v=true,vlen=128 ./build-rv/test_equiv_tolerance
+
+# Test at VLEN=256
+echo "=== VLEN=256 ==="
+qemu-riscv64 -cpu rv64,v=true,vlen=256 ./build-rv/test_equiv_tolerance
+
+# Test at VLEN=512
+echo "=== VLEN=512 ==="
+qemu-riscv64 -cpu rv64,v=true,vlen=512 ./build-rv/test_equiv_tolerance
 ```
