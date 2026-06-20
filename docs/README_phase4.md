@@ -110,3 +110,31 @@ Removing boundary checks yields a **~20.7% speedup** with zero code changes to t
 | `-Ofast` | 1179 KB | 0 | Marginal gain over `-O3`, breaks IEEE FP |
 
 **Conclusion:** The compiler cannot auto-vectorize our boundary-checked loops regardless of optimization level. This provides the data-driven justification for Phase 6, where we manually implement RVV intrinsics on a pre-padded image to achieve true vectorization and the associated performance gains.
+
+How to Run
+
+Run the following commands from the root of the repository:
+
+bash# Run timing comparison (with vs without boundary checks)
+make phase4-timing
+
+# Show binary sizes across all optimization levels
+make phase4-sizes
+
+# Show auto-vectorization info
+make phase4-vecinfo
+
+# Clean all build artifacts
+make clean
+
+# Run all Phase 4 targets at once
+make phase4-all
+
+# Run the Phase 4 binary on QEMU
+make phase4-run
+
+# Run deeper timing experiment (padded vs non-padded)
+make phase4-deeper-timing
+
+# Run deeper vectorization info (fixed boundary check experiment)
+make phase4-deeper-vecinfo-fixed
