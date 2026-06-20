@@ -83,3 +83,86 @@ phase5-run: phase5-build
 
 .PHONY: phase5
 phase5: phase5-run
+
+.PHONY: phase6-lmul-build
+phase6-lmul-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_lmul_sweep.cpp src/image.cpp src/gaussian_rvv_lmul1.cpp src/gaussian_rvv_lmul2.cpp src/gaussian_rvv_lmul4.cpp -o phase6_lmul_sweep
+
+.PHONY: phase6-lmul-run
+phase6-lmul-run: phase6-lmul-build
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_lmul_sweep
+
+.PHONY: phase6-lmul
+phase6-lmul: phase6-lmul-run
+
+.PHONY: phase6-rvv-build
+phase6-rvv-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_rvv_timing.cpp src/image.cpp src/gaussian_rvv.cpp -o phase6_rvv_timing
+
+.PHONY: phase6-rvv-run
+phase6-rvv-run: phase6-rvv-build
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_rvv_timing
+
+.PHONY: phase6
+phase6: phase6-rvv-run
+
+.PHONY: phase6-lmul-timing
+phase6-lmul-timing: phase6-rvv-build
+	@echo "=== PHASE 6: LMUL SWEEP (LMUL=2 chosen) ===" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_rvv_timing
+
+.PHONY: phase6-vlen-sweep
+phase6-vlen-sweep: phase6-rvv-build
+	@echo "=== PHASE 6: VLEN SWEEP ===" && \
+	echo "VLEN=128:" && qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_rvv_timing && \
+	echo "VLEN=256:" && qemu-riscv64 -cpu rv64,v=true,vlen=256 ./phase6_rvv_timing && \
+	echo "VLEN=512:" && qemu-riscv64 -cpu rv64,v=true,vlen=512 ./phase6_rvv_timing
+
+.PHONY: phase6-all
+phase6-all: phase6-lmul-timing phase6-vlen-sweep
+
+.PHONY: phase6-pipeline-build
+phase6-pipeline-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_pipeline.cpp src/image.cpp src/gaussian.cpp src/gaussian_rvv.cpp src/sobel.cpp src/sobel_rvv.cpp src/nms.cpp src/hysteresis.cpp -o phase6_pipeline
+
+.PHONY: phase6-pipeline-run
+phase6-pipeline-run: phase6-pipeline-build
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_pipeline
+
+.PHONY: phase6-complete
+phase6-complete: phase6-pipeline-run phase6-vlen-sweep
+
+.PHONY: phase6-lmul-sweep
+phase6-lmul-sweep:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_lmul_sweep_final.cpp src/image.cpp src/gaussian_rvv.cpp -o phase6_lmul_sweep
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_lmul_sweep
+
+.PHONY: phase6-2-build
+phase6-2-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase6_lmul_sweep_final.cpp src/image.cpp src/gaussian_rvv.cpp -o phase6_lmul_sweep
+
+.PHONY: phase6-2-run
+phase6-2-run: phase6-2-build
+	@echo "=== PHASE 6.2: LMUL SWEEP ===" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_lmul_sweep
+
+.PHONY: phase6-2-vlen-128
+phase6-2-vlen-128: phase6-2-build
+	@echo "Testing at VLEN=128:" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase6_lmul_sweep
+
+.PHONY: phase6-2-vlen-256
+phase6-2-vlen-256: phase6-2-build
+	@echo "Testing at VLEN=256:" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=256 ./phase6_lmul_sweep
+
+.PHONY: phase6-2-vlen-512
+phase6-2-vlen-512: phase6-2-build
+	@echo "Testing at VLEN=512:" && \
+	qemu-riscv64 -cpu rv64,v=true,vlen=512 ./phase6_lmul_sweep
+
+.PHONY: phase6-2-all
+phase6-2-all: phase6-2-vlen-128 phase6-2-vlen-256 phase6-2-vlen-512
+
+.PHONY: phase6-2
+phase6-2: phase6-2-all
