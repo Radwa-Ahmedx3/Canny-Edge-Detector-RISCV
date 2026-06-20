@@ -72,3 +72,14 @@ phase4-deeper-vecinfo-fixed:
 	echo "WITH boundary checks:" && grep "note: vectorized" vec_O3_with_checks.txt | grep "gaussian.cpp:12" && \
 	echo "" && \
 	echo "WITHOUT boundary checks:" && grep "note: vectorized" vec_O3_no_checks.txt | head -5
+
+.PHONY: phase5-build
+phase5-build:
+	$(RV_CXX) $(RV_FLAGS) -O3 src/phase5_profiling.cpp src/image.cpp src/gaussian.cpp src/sobel.cpp src/nms.cpp src/hysteresis.cpp -o phase5_profile
+
+.PHONY: phase5-run
+phase5-run: phase5-build
+	qemu-riscv64 -cpu rv64,v=true,vlen=128 ./phase5_profile
+
+.PHONY: phase5
+phase5: phase5-run
