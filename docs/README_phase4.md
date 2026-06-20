@@ -111,11 +111,14 @@ Removing boundary checks yields a **~20.7% speedup** with zero code changes to t
 
 **Conclusion:** The compiler cannot auto-vectorize our boundary-checked loops regardless of optimization level. This provides the data-driven justification for Phase 6, where we manually implement RVV intrinsics on a pre-padded image to achieve true vectorization and the associated performance gains.
 
-How to Run
+---
+
+## How to Run
 
 Run the following commands from the root of the repository:
 
-bash# Run timing comparison (with vs without boundary checks)
+```bash
+# Run timing comparison (with vs without boundary checks)
 make phase4-timing
 
 # Show binary sizes across all optimization levels
@@ -138,3 +141,4 @@ make phase4-deeper-timing
 
 # Run deeper vectorization info (fixed boundary check experiment)
 make phase4-deeper-vecinfo-fixed
+```
