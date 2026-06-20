@@ -75,8 +75,10 @@ We quantize the gradient direction to **four values only**: 0°, 45°, 90°, 135
 ## How to Run
 
 ```bash
-make canny_rv
-make run
+cat src/gaussian.cpp
+cat src/sobel.cpp
+cat src/nms.cpp 
+cat src/hysteresis.cpp
 ```
 
 ---
