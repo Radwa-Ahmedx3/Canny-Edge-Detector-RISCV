@@ -215,11 +215,11 @@ For each RVV kernel, we run both the scalar and RVV versions on the same input a
 
 ## Phase 3 Master Test Results (8 Tests — All PASS)
 
-![Phase 3 Tests 1-3](img_phase3_tests1.png)
+![Phase 3 Tests 1-3](docs/img_phase3_tests1.png)
 
-![Phase 3 Tests 4-7](img_phase3_tests2.png)
+![Phase 3 Tests 4-7](docs/img_phase3_tests2.png)
 
-![Phase 3 Summary](img_phase3_tests3.png)
+![Phase 3 Summary](docs/img_phase3_tests3.png)
 
 ### Test Summary
 
@@ -240,9 +240,9 @@ For each RVV kernel, we run both the scalar and RVV versions on the same input a
 
 ## Equivalence Testing Results (VLEN = 128 / 256 / 512)
 
-![Equivalence Test VLEN Sweep Part 1](img_phase3_equivalence1.png)
+![Equivalence Test VLEN Sweep Part 1](docs/img_phase3_equivalence1.png)
 
-![Equivalence Test VLEN Sweep Part 2](img_phase3_equivalence2.png)
+![Equivalence Test VLEN Sweep Part 2](docs/img_phase3_equivalence2.png)
 
 ### Results at All VLEN Values
 
@@ -340,7 +340,7 @@ In traditional desktop applications, `-O3` or `-Ofast` is heavily favored for ma
 
 The table below shows the timing breakdown per pipeline stage across all optimization levels, measured on QEMU:
 
-![Timing Breakdown Per Stage](img_timing_breakdown.jpeg)
+![Timing Breakdown Per Stage](docs/img_timing_breakdown.jpeg)
 
 ---
 
@@ -368,7 +368,7 @@ The root cause is our **zero-padding boundary condition handling** in the Gaussi
 
 In our baseline pipeline, zero-padding boundary conditions in the Gaussian and Sobel filters introduce conditional control flow (`if/else` checks for edge pixels) inside the inner loops. The compiler explicitly rejects these loops for vectorization, as seen below:
 
-![Vectorization Comparison: With vs Without Boundary Checks](img_vecinfo_comparison.jpeg)
+![Vectorization Comparison: With vs Without Boundary Checks](docs/img_vecinfo_comparison.jpeg)
 
 The comparison clearly shows:
 - **WITH boundary checks** — `vectorized 0 loops` across all source files
@@ -382,7 +382,7 @@ This experiment confirms that **code structure, not the algorithm itself**, is t
 
 ### Binary Sizes and Auto-Vectorization Summary
 
-![Binary Sizes and Vectorization Info](img_sizes_vecinfo.jpeg)
+![Binary Sizes and Vectorization Info](docs/img_sizes_vecinfo.jpeg)
 
 Key observations:
 - All optimization levels produce binaries in the **1175–1181 KB** range, with `-O2` yielding the smallest binary
@@ -392,7 +392,7 @@ Key observations:
 
 ### Timing Comparison: With vs Without Boundary Checks
 
-![Timing Comparison](img_timing_comparison.jpeg)
+![Timing Comparison](docs/img_timing_comparison.jpeg)
 
 | Configuration | Total Time |
 |--------------|-----------|
@@ -474,7 +474,7 @@ make phase5
 
 ### Per-Stage Timing Breakdown
 
-![Phase 5 Profiling Results](img_phase5_profiling.jpeg)
+![Phase 5 Profiling Results](docs/img_phase5_profiling.jpeg)
 
 | Pipeline Stage | Time (ms) | Percentage |
 |---------------|-----------|------------|
@@ -566,7 +566,7 @@ For computing global normalization factors in the Sobel magnitude phase, we use 
 
 We sweep LMUL values at three VLEN settings to find the optimal register grouping.
 
-![LMUL Sweep Results](img_phase6_lmul_sweep.jpeg)
+![LMUL Sweep Results](docs/img_phase6_lmul_sweep.jpeg)
 
 | VLEN | LMUL=1 | LMUL=2 (baseline) | LMUL=4 | Fixed-Point |
 |------|--------|-------------------|--------|-------------|
@@ -582,7 +582,7 @@ We sweep LMUL values at three VLEN settings to find the optimal register groupin
 
 RVV implementation of the Sobel L1 magnitude: `|Gx| + |Gy|`, using `__riscv_vredmax` for global max and `__riscv_vmv_x_s` to extract the scalar result for normalization.
 
-![Sobel RVV Results](img_phase6_sobel_rvv.jpeg)
+![Sobel RVV Results](docs/img_phase6_sobel_rvv.jpeg)
 
 | VLEN | Scalar | RVV | Speedup |
 |------|--------|-----|---------|
@@ -598,7 +598,7 @@ RVV implementation of the Sobel L1 magnitude: `|Gx| + |Gy|`, using `__riscv_vred
 
 Full RVV vectorization of the 5×5 Gaussian convolution, including interior and boundary pixels.
 
-![Gaussian Full Vectorization](img_phase6_gaussian_full.jpeg)
+![Gaussian Full Vectorization](docs/img_phase6_gaussian_full.jpeg)
 
 | Version | Time | Result |
 |---------|------|--------|
@@ -613,7 +613,7 @@ Full RVV vectorization of the 5×5 Gaussian convolution, including interior and 
 
 Full RVV vectorization of the Sobel magnitude with complete boundary handling.
 
-![Sobel Full Vectorization](img_phase6_sobel_full.jpeg)
+![Sobel Full Vectorization](docs/img_phase6_sobel_full.jpeg)
 
 | Version | Time | Result |
 |---------|------|--------|
@@ -628,7 +628,7 @@ Full RVV vectorization of the Sobel magnitude with complete boundary handling.
 
 The final test verifies that our RVV pipeline produces **identical output** at VLEN=128, 256, and 512 — the defining requirement of correct RVV code.
 
-![VLEN Sweep Results](img_phase6_vlen_sweep.jpeg)
+![VLEN Sweep Results](docs/img_phase6_vlen_sweep.jpeg)
 
 | VLEN | RVV Pipeline Time | VLA Verified |
 |------|-------------------|--------------|
